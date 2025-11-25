@@ -1,8 +1,10 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
 
-class Movie(SQLModel, table=True):
+# SQLModel model for Creature
+class Creature(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    title: str
-    year: int
-    genre: str
+    name: str
+    mythology: int
+    creature_type: str
+    danger_level: int

@@ -3,55 +3,58 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# In-memory "database"
 items_db = {}
-
+# Simple in-memory ID counter
 counter_id = 1
 
-class MovieCreate(BaseModel):
-    title: str
-    year: int
-    genre: str
+# Pydantic models
+class CreatureCreate(BaseModel):
+    name: str
+    mythology: str
+    creature_type: str
+    danger_level: int
 
-class MovieRead(BaseModel):
+class CreatureRead(BaseModel):
     id: int
-    title: str
-    year: int
-    genre: str
+    name: str
+    mythology: str
+    creature_type: str
+    danger_level: int
 
-
-@app.post("/movies/")
-def create_movie(movie: MovieCreate) -> MovieRead:
+# API Endpoints
+@app.post("/creatures/")
+def create_creature(creature: CreatureCreate) -> CreatureRead:
     global counter_id
-    movie_id = counter_id
+    creature_id = counter_id
     counter_id += 1
-    movie_dict = {"id": movie_id, "title": movie.title, "year": movie.year, "genre": movie.genre}
+    creature_dict = {"id": creature_id, "name": creature.name, "mythology": creature.mythology, "creature_type": creature.creature_type, "danger_level": creature.danger_level}
+    items_db[creature_id] = creature_dict
 
-    items_db[movie_id] = movie_dict
+    return CreatureRead(**creature_dict)
 
-    return MovieRead(**movie_dict)
+@app.get("/creatures/")
+def get_creatures() -> list[CreatureRead]:
+    creatures = []
+    for creature_dict in items_db.values():
+        creatures.append(CreatureRead(**creature_dict))
+    return creatures
 
-@app.get("/movies/")
-def getsMovies() -> list[MovieRead]:
-    movies = []
-    for movie_dict in items_db.values():
-        movies.append(MovieRead(**movie_dict))
-    return movies
+@app.put("/creatures/{creature_id}")
+def update_creature(creature_id: int, creature: CreatureCreate) -> CreatureRead:
+    if creature_id not in items_db:
+        raise HTTPException(status_code=404, detail="Creature not found")
 
-@app.put("/movies/{movie_id}")
-def update_movie(movie_id: int, movie: MovieCreate) -> MovieRead:
-    if movie_id not in items_db:
-        raise HTTPException(status_code=404, detail="Movie not found")
+    creature_dict = {"id": creature_id, "name": creature.name, "mythology": creature.mythology, "creature_type": creature.creature_type, "danger_level": creature.danger_level}
+    items_db[creature_id] = creature_dict
 
-    movie_dict = {"id": movie_id, "title": movie.title, "year": movie.year, "genre": movie.genre}
-    items_db[movie_id] = movie_dict
+    return CreatureRead(**creature_dict)
 
-    return MovieRead(**movie_dict)
+@app.delete("/creatures/{creature_id}")
+def delete_creature(creature_id: int) -> dict:
+    if creature_id not in items_db:
+        raise HTTPException(status_code=404, detail="creature not found")
 
-@app.delete("/movies/{movie_id}")
-def delete_movie(movie_id: int) -> dict:
-    if movie_id not in items_db:
-        raise HTTPException(status_code=404, detail="Movie not found")
+    del items_db[creature_id]
 
-    del items_db[movie_id]
-
-    return {"detail": "Movie deleted successfully"}
+    return {"detail": "creature deleted successfully"}

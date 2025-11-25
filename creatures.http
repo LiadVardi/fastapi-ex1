@@ -1,0 +1,28 @@
+### Create a new creature
+POST http://localhost:8000/creatures/
+Content-Type: application/json
+
+{
+  "name": "Dragon",
+  "mythology": "Fantasy",
+  "creature_type": "Fire",
+  "danger_level": 10
+}
+
+### List all creatures
+GET http://localhost:8000/creatures/
+
+### Update an existing creature (replace {id} after you create one)
+PUT http://localhost:8000/creatures/1
+Content-Type: application/json
+
+{
+  "name": "Ice Dragon",
+  "mythology": "Fantasy",
+  "creature_type": "Ice",
+  "danger_level": 8
+}
+
+### Delete a creature
+# Note: This example request deletes only the creature with ID 1. 
+DELETE http://localhost:8000/creatures/1
